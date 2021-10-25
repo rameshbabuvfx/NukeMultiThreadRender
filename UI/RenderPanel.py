@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'RenderPanel.ui',
 # licensing of 'RenderPanel.ui' applies.
 #
-# Created: Sun Oct 24 16:25:45 2021
+# Created: Mon Oct 25 15:16:37 2021
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -45,9 +45,7 @@ class Ui_Form(object):
         self.render_tableWidget.setGridStyle(QtCore.Qt.NoPen)
         self.render_tableWidget.setObjectName("render_tableWidget")
         self.render_tableWidget.setColumnCount(7)
-        self.render_tableWidget.setRowCount(1)
-        item = QtWidgets.QTableWidgetItem()
-        self.render_tableWidget.setVerticalHeaderItem(0, item)
+        self.render_tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.render_tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -79,7 +77,6 @@ class Ui_Form(object):
         Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Form", None, -1))
         self.queue_checkBox.setText(QtWidgets.QApplication.translate("Form", "Queue Renders", None, -1))
         self.removed_finished_checkBox.setText(QtWidgets.QApplication.translate("Form", "Removed Finished Tasks", None, -1))
-        self.render_tableWidget.verticalHeaderItem(0).setText(QtWidgets.QApplication.translate("Form", "New Row", None, -1))
         self.render_tableWidget.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Form", "Node", None, -1))
         self.render_tableWidget.horizontalHeaderItem(1).setText(QtWidgets.QApplication.translate("Form", "Progress", None, -1))
         self.render_tableWidget.horizontalHeaderItem(2).setText(QtWidgets.QApplication.translate("Form", "Status", None, -1))

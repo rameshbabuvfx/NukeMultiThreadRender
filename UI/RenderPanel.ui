@@ -95,7 +95,7 @@
         <bool>true</bool>
        </attribute>
        <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>125</number>
+        <number>100</number>
        </attribute>
        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
         <bool>false</bool>
@@ -109,11 +109,6 @@
        <attribute name="verticalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
-       <row>
-        <property name="text">
-         <string>New Row</string>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>Node</string>

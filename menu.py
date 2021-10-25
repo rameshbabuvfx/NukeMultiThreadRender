@@ -1,15 +1,15 @@
-import nukescripts
-
 from multiThreadRender import MultiThreadRender
+from multiThreadRender import UpdateRenderWidget
 
 
 def add_render_knob():
     node = nuke.thisNode()
     knob = nuke.PyScript_Knob("RenderThread")
     knob.setValue("""
-from PySide2 import QtWidgets
+from PySide2.QtWidgets import *
+
 widgets = set()
-for obj in QtWidgets.QApplication.allWidgets():
+for obj in QApplication.allWidgets():
     widgets.add(obj.objectName())
 
 id = 'uk.co.thefoundry.MultiThreadRender'
@@ -24,6 +24,10 @@ if id not in widgets:
     ).addToPane(pane)
 else:
     pass
+try:
+    UpdateRenderWidget(render_panel, nuke.thisNode())
+except Exception as error:
+    print(error)
     """)
     node.addKnob(knob)
 

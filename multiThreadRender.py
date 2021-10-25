@@ -54,8 +54,9 @@ class UpdateRenderWidget:
             nuke.scriptName(),
             node.frameRange()
         )
-        self.worker = RenderThread(cmd=nuke_render_cmd)
+        self.worker = RenderThread(cmd=nuke_render_cmd, last_frame=str(node.frameRange()).split("-")[1])
         self.worker.signal.progress_value.connect(self.update_progress_bar)
+        self.worker.signal.time_left.connect(self.update_remaining_time)
         self.multi_render_obj.thread.start(self.worker)
 
     def delete_row(self):
@@ -65,38 +66,57 @@ class UpdateRenderWidget:
     def update_progress_bar(self, val):
         self.progress_bar.setValue(val)
 
+    def update_remaining_time(self, val):
+        time_item = QTableWidgetItem(val)
+        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 4, time_item)
+
     def set_render_queue(self):
-        print("check value")
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
 
 
 class WorkerSignals(QObject):
     progress_value = Signal(int)
+    time_left = Signal(str)
 
 
 class RenderThread(QRunnable):
-    def __init__(self, cmd=None):
+    def __init__(self, cmd=None, last_frame=None):
         super(RenderThread, self).__init__()
         self.cmd = cmd
+        self.total = last_frame
         print(self.cmd)
         self.signal = WorkerSignals()
+        self.start_time = time.time()
 
     def run(self):
         render_process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE)
-        # with open(r"{}\pid.log".format(package_path), "w+") as pid_file:
-        #     pid_file.write(str(render_process.pid))
-        #     pid_file.close()
-        # while True:
-        #     render_log = render_process.stdout.readline().decode(encoding="utf-8")
-        #     if render_log:
-        #         render_progress = str(render_log)
-        #     else:
-        #         render_progress = "Render Completed"
-        #         break
-        #     for i in range(100):
-        #         self.signal.progress_value.emit(i)
-        #         time.sleep(0.5)
+        while True:
+            render_log = render_process.stdout.readline().decode(encoding="utf-8")
+            if render_log.startswith("Frame"):
+                value = render_log.split(" ")[1]
+                percent = (int(value) / int(self.total)) * 100
+                current_time = time.time()
+                elapsed_time = current_time - self.start_time
+                left_seconds = 100 * elapsed_time / percent - elapsed_time
+
+                def sec_to_hours(seconds):
+                    a = str(seconds // 3600)
+                    b = str((seconds % 3600) // 60)
+                    c = str((seconds % 3600) % 60)
+                    if a and b:
+                        left = "{} seconds".format(c)
+                    elif a:
+                        left = "{} minutes".format(b)
+                    else:
+                        left = "{} hours".format(a)
+                    return left
+
+                remaining_time = sec_to_hours(int(left_seconds))
+                self.signal.progress_value.emit(int(percent))
+                self.signal.time_left.emit(str(remaining_time))
+            if render_log == "":
+                break
 
     # @staticmethod
     # def kill_subprocess():

@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import subprocess
 
 try:
     import nuke
@@ -33,7 +34,6 @@ class UpdateRenderWidget:
         self.progress_bar = QProgressBar()
         self.progress_bar.setMinimumWidth(250)
         self.progress_bar.setRange(1, 100)
-        self.progress_bar.setValue(50)
 
         name_item = QTableWidgetItem(node.name())
         range_item = QTableWidgetItem(str(node.frameRange()))
@@ -46,8 +46,15 @@ class UpdateRenderWidget:
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, range_item)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, file_path_item)
         self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1, self.progress_bar)
+        self.nuke_exec_path = sys.executable
 
-        self.worker = RenderThread()
+        nuke_render_cmd = r'"{}" -X "{}" "{}" "{}"'.format(
+            self.nuke_exec_path,
+            node.name(),
+            nuke.scriptName(),
+            node.frameRange()
+        )
+        self.worker = RenderThread(cmd=nuke_render_cmd)
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.multi_render_obj.thread.start(self.worker)
 
@@ -69,12 +76,14 @@ class WorkerSignals(QObject):
 
 
 class RenderThread(QRunnable):
-    def __init__(self):
+    def __init__(self, cmd=None):
         super(RenderThread, self).__init__()
+        self.cmd = cmd
+        print(self.cmd)
         self.signal = WorkerSignals()
 
     def run(self):
-        # render_process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE)
+        render_process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE)
         # with open(r"{}\pid.log".format(package_path), "w+") as pid_file:
         #     pid_file.write(str(render_process.pid))
         #     pid_file.close()
@@ -85,9 +94,9 @@ class RenderThread(QRunnable):
         #     else:
         #         render_progress = "Render Completed"
         #         break
-            for i in range(100):
-                self.signal.progress_value.emit(i)
-                time.sleep(0.5)
+        #     for i in range(100):
+        #         self.signal.progress_value.emit(i)
+        #         time.sleep(0.5)
 
     # @staticmethod
     # def kill_subprocess():

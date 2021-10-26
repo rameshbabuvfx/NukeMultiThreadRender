@@ -3,6 +3,7 @@ import platform
 import sys
 import time
 import subprocess
+import json
 
 try:
     import nuke
@@ -15,6 +16,8 @@ from PySide2.QtGui import *
 
 from UI.RenderPanel import Ui_Form
 
+PACKAGE_PATH = os.path.dirname(__file__)
+
 
 class MultiThreadRender(Ui_Form, QWidget):
     def __init__(self):
@@ -22,6 +25,12 @@ class MultiThreadRender(Ui_Form, QWidget):
         self.setupUi(self)
         self.thread = QThreadPool()
         self.render_tableWidget.setColumnWidth(1, 250)
+        self.clear_json_cache()
+
+    def clear_json_cache(self):
+        empty_data = {}
+        with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "w+") as json_file:
+            json.dump(empty_data, json_file, indent=4)
 
 
 class UpdateRenderWidget:
@@ -55,19 +64,19 @@ class UpdateRenderWidget:
         name_item = QTableWidgetItem(node.name())
         range_item = QTableWidgetItem(str(node.frameRange()))
         self.render_path = node['file'].value()
-        self.package_path = os.path.dirname(__file__)
         file_path_item = QTableWidgetItem(self.render_path)
 
         self.control_widget = QWidget()
         self.control_layout = QHBoxLayout()
         self.control_layout.setContentsMargins(3, 0, 3, 0)
         self.open_button = QPushButton()
-        self.open_button.setIcon(QIcon(r"{}\icons\open-folder.png".format(self.package_path)))
+        self.open_button.setIcon(QIcon(r"{}\icons\open-folder.png".format(PACKAGE_PATH)))
         self.stop_button = QPushButton()
-        self.stop_button.setIcon(QIcon(r"{}\icons\stop.png".format(self.package_path)))
+        self.stop_button.setIcon(QIcon(r"{}\icons\stop.png".format(PACKAGE_PATH)))
         self.control_layout.addWidget(self.open_button)
         self.control_layout.addWidget(self.stop_button)
         self.control_widget.setLayout(self.control_layout)
+        self.stop_button.clicked.connect(lambda: self.kill_subprocess())
         self.stop_button.clicked.connect(lambda: self.delete_row())
         self.open_button.clicked.connect(self.open_folder)
 
@@ -90,8 +99,11 @@ class UpdateRenderWidget:
             nuke.scriptName(),
             node.frameRange()
         )
-        self.worker = RenderThread(cmd=nuke_render_cmd,
-                                   last_frame=str(node.frameRange()).split("-")[1])
+        self.worker = RenderThread(
+            cmd=nuke_render_cmd,
+            last_frame=str(node.frameRange()).split("-")[1],
+            node_name=node.name()
+        )
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
         self.multi_render_obj.thread.start(self.worker)
@@ -136,6 +148,14 @@ class UpdateRenderWidget:
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
 
+    def kill_subprocess(self):
+        selected_row = self.multi_render_obj.render_tableWidget.currentRow()
+        selected_node_name = self.multi_render_obj.render_tableWidget.item(selected_row, 0).text()
+        with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
+            json_data = json.load(json_file)
+        process_pid = json_data[str(selected_node_name)]
+        os.kill(int(process_pid), 9)
+
 
 class WorkerSignals(QObject):
     progress_value = Signal(int)
@@ -143,16 +163,24 @@ class WorkerSignals(QObject):
 
 
 class RenderThread(QRunnable):
-    def __init__(self, cmd=None, last_frame=None):
+    def __init__(self, cmd=None, last_frame=None, node_name=None):
         super(RenderThread, self).__init__()
         self.cmd = cmd
         self.total = last_frame
-        print(self.cmd)
+        self.node_name = node_name
         self.signal = WorkerSignals()
         self.start_time = time.time()
 
     def run(self):
         render_process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE)
+        with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
+            json_data = json.load(json_file)
+
+        json_data.update({self.node_name: render_process.pid})
+
+        with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "w+") as json_file:
+            json.dump(json_data, json_file, indent=4)
+
         while True:
             render_log = render_process.stdout.readline().decode(encoding="utf-8")
             if render_log.startswith("Frame"):
@@ -174,21 +202,11 @@ class RenderThread(QRunnable):
                         left = "{} hours".format(a)
                     return left
 
-                def kill_subprocess():
-                    pass
-
                 remaining_time = sec_to_hours(int(left_seconds))
                 self.signal.progress_value.emit(int(percent))
                 self.signal.time_left.emit(str(remaining_time))
             if render_log == "":
                 break
-
-    # @staticmethod
-    # def kill_subprocess():
-    #     with open(r"{}\pid.log".format(package_path), "r+") as pid_file:
-    #         pid_number = pid_file.readline()
-    #         pid_file.close()
-    #     os.kill(int(pid_number), 9)
 
 
 if __name__ == '__main__':
@@ -196,3 +214,4 @@ if __name__ == '__main__':
     render = MultiThreadRender()
     render.show()
     sys.exit(app.exec_())
+

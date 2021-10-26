@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'RenderPanel.ui',
 # licensing of 'RenderPanel.ui' applies.
 #
-# Created: Mon Oct 25 15:16:37 2021
+# Created: Tue Oct 26 12:33:18 2021
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,7 +34,8 @@ class Ui_Form(object):
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.render_tableWidget = QtWidgets.QTableWidget(Form)
-        self.render_tableWidget.setStyleSheet("selection-background-color: rgba(247, 147, 30, 75);")
+        self.render_tableWidget.setStyleSheet("selection-background-color: rgb(46, 46, 46);\n"
+"selection-color: rgb(204, 204, 204);")
         self.render_tableWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.render_tableWidget.setLineWidth(0)
         self.render_tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -62,7 +63,7 @@ class Ui_Form(object):
         self.render_tableWidget.setHorizontalHeaderItem(6, item)
         self.render_tableWidget.horizontalHeader().setVisible(True)
         self.render_tableWidget.horizontalHeader().setCascadingSectionResizes(True)
-        self.render_tableWidget.horizontalHeader().setMinimumSectionSize(125)
+        self.render_tableWidget.horizontalHeader().setMinimumSectionSize(100)
         self.render_tableWidget.horizontalHeader().setSortIndicatorShown(False)
         self.render_tableWidget.horizontalHeader().setStretchLastSection(True)
         self.render_tableWidget.verticalHeader().setVisible(False)

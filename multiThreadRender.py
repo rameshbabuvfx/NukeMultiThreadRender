@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 import time
 import subprocess
@@ -32,20 +33,48 @@ class UpdateRenderWidget:
         self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
 
         self.progress_bar = QProgressBar()
+        self.progress_bar.setStyleSheet("""
+            QProgressBar{
+            color: rgb(77, 77, 77);
+            }
+            QProgressBar:chunk {
+            background-color: qlineargradient(spread:pad, x1:0.487, y1:0, x2:0.481, y2:1, stop:0 rgba(255, 167, 64, 255), stop:1 rgba(205, 122, 24, 255));
+            border-radius:3px;
+            border-style: solid;
+            border-width: 1px;
+            border-left-color: rgb(240, 140, 50);
+            border-bottom-color: rgb(240, 140, 50);
+            }
+        """)
         self.progress_bar.setMinimumWidth(250)
         self.progress_bar.setRange(1, 100)
 
         name_item = QTableWidgetItem(node.name())
         range_item = QTableWidgetItem(str(node.frameRange()))
-        file_path_item = QTableWidgetItem(node["file"].value())
-        self.stop_button = QPushButton("Stop")
+        self.render_path = node['file'].value()
+        self.package_path = os.path.dirname(__file__)
+        file_path_item = QTableWidgetItem(self.render_path)
+
+        self.control_widget = QWidget()
+        self.control_layout = QHBoxLayout()
+        self.control_layout.setContentsMargins(3, 0, 3, 0)
+        self.open_button = QPushButton()
+        self.open_button.setIcon(QIcon(r"{}\icons\open-folder.png".format(self.package_path)))
+        self.stop_button = QPushButton()
+        self.stop_button.setIcon(QIcon(r"{}\icons\stop.png".format(self.package_path)))
+        self.control_layout.addWidget(self.open_button)
+        self.control_layout.addWidget(self.stop_button)
+        self.control_widget.setLayout(self.control_layout)
         self.stop_button.clicked.connect(lambda: self.delete_row())
+        self.open_button.clicked.connect(self.open_folder)
 
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 0, name_item)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3, self.stop_button)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3,
+                                                               self.control_widget)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, range_item)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, file_path_item)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1, self.progress_bar)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1,
+                                                               self.progress_bar)
         self.nuke_exec_path = sys.executable
 
         nuke_render_cmd = r'"{}" -X "{}" "{}" "{}"'.format(
@@ -54,7 +83,8 @@ class UpdateRenderWidget:
             nuke.scriptName(),
             node.frameRange()
         )
-        self.worker = RenderThread(cmd=nuke_render_cmd, last_frame=str(node.frameRange()).split("-")[1])
+        self.worker = RenderThread(cmd=nuke_render_cmd,
+                                   last_frame=str(node.frameRange()).split("-")[1])
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
         self.multi_render_obj.thread.start(self.worker)
@@ -62,6 +92,15 @@ class UpdateRenderWidget:
     def delete_row(self):
         selected_row = self.multi_render_obj.render_tableWidget.currentRow()
         self.multi_render_obj.render_tableWidget.removeRow(selected_row)
+
+    def open_folder(self):
+        render_folder = os.path.dirname(self.render_path)
+        if os.path.exists(render_folder):
+            if (platform.system()).lower() == "linux":
+                os.system("xdg-open '%s'" % render_folder)
+            else:
+                prj_path = render_folder.replace("/", "\\")
+                os.startfile(prj_path)
 
     def update_progress_bar(self, val):
         self.progress_bar.setValue(val)

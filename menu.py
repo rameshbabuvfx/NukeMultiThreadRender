@@ -32,6 +32,7 @@ if id not in widgets:
 else:
     pass
 try:
+    nuke.scriptSave()
     UpdateRenderWidget(render_panel, nuke.thisNode())
 except Exception as error:
     print(error)

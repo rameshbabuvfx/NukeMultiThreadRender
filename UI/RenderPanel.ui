@@ -62,12 +62,16 @@
      <item>
       <widget class="QTableWidget" name="render_tableWidget">
        <property name="styleSheet">
-        <string notr="true">selection-background-color: rgba(247, 147, 30, 75);</string>
+        <string notr="true">selection-background-color: rgb(46, 46, 46);
+selection-color: rgb(204, 204, 204);</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
        <property name="lineWidth">
+        <number>0</number>
+       </property>
+       <property name="midLineWidth">
         <number>0</number>
        </property>
        <property name="editTriggers">
@@ -109,6 +113,16 @@
        <attribute name="verticalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
+       <row>
+        <property name="text">
+         <string>New Row</string>
+        </property>
+       </row>
+       <row>
+        <property name="text">
+         <string>New Row</string>
+        </property>
+       </row>
        <column>
         <property name="text">
          <string>Node</string>

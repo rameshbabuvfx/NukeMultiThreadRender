@@ -35,7 +35,9 @@ class UpdateRenderWidget:
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet("""
             QProgressBar{
-            color: rgb(77, 77, 77);
+            color: rgb(242, 156, 54);
+            text-align: right; 
+            margin-right: 12ex;
             }
             QProgressBar:chunk {
             background-color: qlineargradient(spread:pad, x1:0.487, y1:0, x2:0.481, y2:1, stop:0 rgba(255, 167, 64, 255), stop:1 rgba(205, 122, 24, 255));
@@ -47,6 +49,7 @@ class UpdateRenderWidget:
             }
         """)
         self.progress_bar.setMinimumWidth(250)
+        self.progress_bar.setMaximumHeight(27)
         self.progress_bar.setRange(1, 100)
 
         name_item = QTableWidgetItem(node.name())
@@ -68,13 +71,17 @@ class UpdateRenderWidget:
         self.stop_button.clicked.connect(lambda: self.delete_row())
         self.open_button.clicked.connect(self.open_folder)
 
+        self.status_label = QLabel()
+        self.status_label.setText("Running")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setStyleSheet("color: rgb(242, 156, 54)")
+
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 0, name_item)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3,
-                                                               self.control_widget)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1, self.progress_bar)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3, self.control_widget)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, range_item)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, file_path_item)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1,
-                                                               self.progress_bar)
         self.nuke_exec_path = sys.executable
 
         nuke_render_cmd = r'"{}" -X "{}" "{}" "{}"'.format(
@@ -103,6 +110,22 @@ class UpdateRenderWidget:
                 os.startfile(prj_path)
 
     def update_progress_bar(self, val):
+        if val == 100:
+            self.status_label.setText("Completed")
+            self.status_label.setStyleSheet("color: rgb(85, 255, 0)")
+            self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
+            self.progress_bar.setStyleSheet("color: rgb(85, 255, 0)")
+            self.progress_bar.setStyleSheet("""
+                QProgressBar{
+                color: rgb(85, 255, 0);
+                text-align: right; 
+                margin-right: 12ex;
+                }
+                QProgressBar:chunk {
+                background-color: qlineargradient(spread:pad, x1:0.487, y1:0, x2:0.481, y2:1, stop:0 rgba(255, 167, 64, 255), stop:1 rgba(205, 122, 24, 255));
+                border-radius:3px;
+                }
+            """)
         self.progress_bar.setValue(val)
 
     def update_remaining_time(self, val):
@@ -150,6 +173,9 @@ class RenderThread(QRunnable):
                     else:
                         left = "{} hours".format(a)
                     return left
+
+                def kill_subprocess():
+                    pass
 
                 remaining_time = sec_to_hours(int(left_seconds))
                 self.signal.progress_value.emit(int(percent))

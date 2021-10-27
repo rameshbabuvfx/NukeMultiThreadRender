@@ -49,17 +49,17 @@ class UpdateRenderWidget:
 
         self.multi_render_obj = render_panel.customKnob.getObject().widget
         self.row_count = self.multi_render_obj.render_tableWidget.rowCount()
-        if self.row_count == 0:
-            self.multi_render_obj.render_tableWidget.setRowCount(1)
-            self.update_render_ui()
 
+        running_tasks = []
         for row in range(self.row_count):
             item_node_name = self.multi_render_obj.render_tableWidget.item(row, 0)
-            if item_node_name.text() != self.node.name():
-                self.multi_render_obj.render_tableWidget.setRowCount(self.row_count + 1)
-                self.update_render_ui()
-            else:
-                break
+            running_tasks.append(item_node_name.text())
+
+        if self.node.name() not in running_tasks:
+            self.multi_render_obj.render_tableWidget.setRowCount(self.row_count + 1)
+            self.update_render_ui()
+        else:
+            nuke.message("Already Task is Running")
 
     def update_render_ui(self):
         self.progress_bar.setStyleSheet(
@@ -108,15 +108,14 @@ class UpdateRenderWidget:
 
     def connect_ui(self):
         self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
-        self.stop_button.clicked.connect(lambda: self.kill_subprocess())
+        # self.stop_button.clicked.connect(lambda: self.kill_subprocess())
         self.stop_button.clicked.connect(lambda: self.delete_row())
         self.open_button.clicked.connect(self.open_folder)
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
 
     def delete_row(self):
-        selected_row = self.multi_render_obj.render_tableWidget.currentRow()
-        self.multi_render_obj.render_tableWidget.removeRow(selected_row)
+        self.multi_render_obj.render_tableWidget.removeRow(self.current_row)
 
     def open_folder(self):
         render_folder = os.path.dirname(self.render_path)
@@ -147,8 +146,7 @@ class UpdateRenderWidget:
             self.multi_render_obj.thread.setMaxThreadCount(1)
 
     def kill_subprocess(self):
-        selected_row = self.multi_render_obj.render_tableWidget.currentRow()
-        selected_node_name = self.multi_render_obj.render_tableWidget.item(selected_row, 0).text()
+        selected_node_name = self.multi_render_obj.render_tableWidget.item(self.current_row + 1, 0).text()
         with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
             json_data = json.load(json_file)
         process_pid = json_data[str(selected_node_name)]

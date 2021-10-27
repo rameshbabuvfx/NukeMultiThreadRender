@@ -27,7 +27,8 @@ class MultiThreadRender(Ui_Form, QWidget):
         self.render_tableWidget.setColumnWidth(1, 250)
         self.clear_json_cache()
 
-    def clear_json_cache(self):
+    @staticmethod
+    def clear_json_cache():
         empty_data = {}
         with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "w+") as json_file:
             json.dump(empty_data, json_file, indent=4)
@@ -36,12 +37,31 @@ class MultiThreadRender(Ui_Form, QWidget):
 class UpdateRenderWidget:
 
     def __init__(self, render_panel, node):
+        self.node = node
+        self.worker = None
+        self.render_path = self.node['file'].value()
+        self.progress_bar = QProgressBar()
+        self.control_widget = QWidget()
+        self.control_layout = QHBoxLayout()
+        self.open_button = QPushButton()
+        self.stop_button = QPushButton()
+        self.status_label = QLabel()
+
         self.multi_render_obj = render_panel.customKnob.getObject().widget
         self.row_count = self.multi_render_obj.render_tableWidget.rowCount()
-        self.multi_render_obj.render_tableWidget.setRowCount(self.row_count + 1)
-        self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
+        if self.row_count == 0:
+            self.multi_render_obj.render_tableWidget.setRowCount(1)
+            self.update_render_ui()
 
-        self.progress_bar = QProgressBar()
+        for row in range(self.row_count):
+            item_node_name = self.multi_render_obj.render_tableWidget.item(row, 0)
+            if item_node_name.text() != self.node.name():
+                self.multi_render_obj.render_tableWidget.setRowCount(self.row_count + 1)
+                self.update_render_ui()
+            else:
+                break
+
+    def update_render_ui(self):
         self.progress_bar.setStyleSheet("""
             QProgressBar{
             color: rgb(242, 156, 54);
@@ -61,26 +81,17 @@ class UpdateRenderWidget:
         self.progress_bar.setMaximumHeight(27)
         self.progress_bar.setRange(1, 100)
 
-        name_item = QTableWidgetItem(node.name())
-        range_item = QTableWidgetItem(str(node.frameRange()))
-        self.render_path = node['file'].value()
+        name_item = QTableWidgetItem(self.node.name())
+        range_item = QTableWidgetItem(str(self.node.frameRange()))
         file_path_item = QTableWidgetItem(self.render_path)
 
-        self.control_widget = QWidget()
-        self.control_layout = QHBoxLayout()
         self.control_layout.setContentsMargins(3, 0, 3, 0)
-        self.open_button = QPushButton()
         self.open_button.setIcon(QIcon(r"{}\icons\open-folder.png".format(PACKAGE_PATH)))
-        self.stop_button = QPushButton()
         self.stop_button.setIcon(QIcon(r"{}\icons\stop.png".format(PACKAGE_PATH)))
         self.control_layout.addWidget(self.open_button)
         self.control_layout.addWidget(self.stop_button)
         self.control_widget.setLayout(self.control_layout)
-        self.stop_button.clicked.connect(lambda: self.kill_subprocess())
-        self.stop_button.clicked.connect(lambda: self.delete_row())
-        self.open_button.clicked.connect(self.open_folder)
 
-        self.status_label = QLabel()
         self.status_label.setText("Running")
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("color: rgb(242, 156, 54)")
@@ -91,22 +102,29 @@ class UpdateRenderWidget:
         self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3, self.control_widget)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, range_item)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, file_path_item)
-        self.nuke_exec_path = sys.executable
+        nuke_exec_path = sys.executable
 
         nuke_render_cmd = r'"{}" -X "{}" "{}" "{}"'.format(
-            self.nuke_exec_path,
-            node.name(),
+            nuke_exec_path,
+            self.node.name(),
             nuke.scriptName(),
-            node.frameRange()
+            self.node.frameRange()
         )
         self.worker = RenderThread(
             cmd=nuke_render_cmd,
-            last_frame=str(node.frameRange()).split("-")[1],
-            node_name=node.name()
+            last_frame=str(self.node.frameRange()).split("-")[1],
+            node_name=self.node.name()
         )
+        self.connect_ui()
+        self.multi_render_obj.thread.start(self.worker)
+
+    def connect_ui(self):
+        self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
+        self.stop_button.clicked.connect(lambda: self.kill_subprocess())
+        self.stop_button.clicked.connect(lambda: self.delete_row())
+        self.open_button.clicked.connect(self.open_folder)
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
-        self.multi_render_obj.thread.start(self.worker)
 
     def delete_row(self):
         selected_row = self.multi_render_obj.render_tableWidget.currentRow()

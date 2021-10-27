@@ -1,5 +1,6 @@
 from multiThreadRender import MultiThreadRender
 from multiThreadRender import UpdateRenderWidget
+import nuke
 
 
 def add_render_knob():
@@ -40,6 +41,15 @@ except Exception as error:
         """)
         node.addKnob(render_tab)
         node.addKnob(knob)
+
+
+# pane = nuke.getPaneFor("uk.co.thefoundry.MultiThreadRender")
+# render_panel = nukescripts.panels.registerWidgetAsPanel(
+#     "MultiThreadRender",
+#     "Multi Render Thread",
+#     "uk.co.thefoundry.MultiThreadRender",
+#     True
+# ).addToPane(pane)
 
 
 nuke.addOnCreate(add_render_knob, nodeClass="Write")

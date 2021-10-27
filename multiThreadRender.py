@@ -108,14 +108,22 @@ class UpdateRenderWidget:
 
     def connect_ui(self):
         self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
-        # self.stop_button.clicked.connect(lambda: self.kill_subprocess())
-        self.stop_button.clicked.connect(lambda: self.delete_row())
+        self.stop_button.clicked.connect(lambda: self.delete_kill_task())
         self.open_button.clicked.connect(self.open_folder)
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
 
-    def delete_row(self):
-        self.multi_render_obj.render_tableWidget.removeRow(self.current_row)
+    def delete_kill_task(self):
+        recent_row_count = self.multi_render_obj.render_tableWidget.rowCount()
+        for row in range(recent_row_count):
+            del_node_name = self.multi_render_obj.render_tableWidget.item(row, 0).text()
+            if self.node.name() == del_node_name:
+                with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
+                    json_data = json.load(json_file)
+                process_pid = json_data[str(del_node_name)]
+                os.kill(int(process_pid), 9)
+
+                self.multi_render_obj.render_tableWidget.removeRow(row)
 
     def open_folder(self):
         render_folder = os.path.dirname(self.render_path)
@@ -144,13 +152,6 @@ class UpdateRenderWidget:
     def set_render_queue(self):
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
-
-    def kill_subprocess(self):
-        selected_node_name = self.multi_render_obj.render_tableWidget.item(self.current_row + 1, 0).text()
-        with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
-            json_data = json.load(json_file)
-        process_pid = json_data[str(selected_node_name)]
-        os.kill(int(process_pid), 9)
 
 
 class WorkerSignals(QObject):

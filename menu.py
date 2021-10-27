@@ -11,7 +11,8 @@ def add_render_knob():
         render_knob = "not exist"
 
     if render_knob == "not exist":
-        knob = nuke.PyScript_Knob("RenderThread")
+        render_tab = nuke.Tab_Knob("RenderThread", "RenderThread")
+        knob = nuke.PyScript_Knob("SubmitRender")
         knob.setValue("""
 from PySide2.QtWidgets import *
 
@@ -37,6 +38,7 @@ try:
 except Exception as error:
     print(error)
         """)
+        node.addKnob(render_tab)
         node.addKnob(knob)
 
 

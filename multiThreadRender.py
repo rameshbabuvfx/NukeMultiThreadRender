@@ -62,21 +62,9 @@ class UpdateRenderWidget:
                 break
 
     def update_render_ui(self):
-        self.progress_bar.setStyleSheet("""
-            QProgressBar{
-            color: rgb(242, 156, 54);
-            text-align: right; 
-            margin-right: 12ex;
-            }
-            QProgressBar:chunk {
-            background-color: qlineargradient(spread:pad, x1:0.487, y1:0, x2:0.481, y2:1, stop:0 rgba(255, 167, 64, 255), stop:1 rgba(205, 122, 24, 255));
-            border-radius:3px;
-            border-style: solid;
-            border-width: 1px;
-            border-left-color: rgb(240, 140, 50);
-            border-bottom-color: rgb(240, 140, 50);
-            }
-        """)
+        self.progress_bar.setStyleSheet(
+            open(r"{}\UI\progressBarStart.qss".format(PACKAGE_PATH), "r+").read()
+        )
         self.progress_bar.setMinimumWidth(250)
         self.progress_bar.setMaximumHeight(27)
         self.progress_bar.setRange(1, 100)
@@ -145,17 +133,9 @@ class UpdateRenderWidget:
             self.status_label.setStyleSheet("color: rgb(85, 255, 0)")
             self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
             self.progress_bar.setStyleSheet("color: rgb(85, 255, 0)")
-            self.progress_bar.setStyleSheet("""
-                QProgressBar{
-                color: rgb(85, 255, 0);
-                text-align: right; 
-                margin-right: 12ex;
-                }
-                QProgressBar:chunk {
-                background-color: qlineargradient(spread:pad, x1:0.487, y1:0, x2:0.481, y2:1, stop:0 rgba(255, 167, 64, 255), stop:1 rgba(205, 122, 24, 255));
-                border-radius:3px;
-                }
-            """)
+            self.progress_bar.setStyleSheet(
+                open(r"{}\UI\progressBarEnd.qss".format(PACKAGE_PATH), "r+").read()
+            )
         self.progress_bar.setValue(val)
 
     def update_remaining_time(self, val):

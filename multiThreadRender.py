@@ -202,7 +202,7 @@ class RenderThread(QRunnable):
             render_log = render_process.stdout.readline().decode(encoding="utf-8")
             if render_log.startswith("Frame"):
                 value = render_log.split(" ")[1]
-                percent = (int(value) / int(self.total)) * 100
+                percent = int((float(value) / float(self.total)) * 100)
                 current_time = time.time()
                 elapsed_time = current_time - self.start_time
                 left_seconds = 100 * elapsed_time / percent - elapsed_time
@@ -220,7 +220,7 @@ class RenderThread(QRunnable):
                     return left
 
                 remaining_time = sec_to_hours(int(left_seconds))
-                self.signal.progress_value.emit(int(percent))
+                self.signal.progress_value.emit(percent)
                 self.signal.time_left.emit(str(remaining_time))
                 self.signal.frame_of.emit(str(value))
             if render_log == "":

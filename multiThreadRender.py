@@ -27,6 +27,12 @@ class MultiThreadRender(Ui_Form, QWidget):
         self.render_tableWidget.setColumnWidth(1, 250)
         self.clear_json_cache()
 
+    def hideEvent(self, event):
+        print("this panel is closed  : ", event)
+
+    def showEvent(self, event):
+        print("this panel is opened  :",  event)
+
     @staticmethod
     def clear_json_cache():
         empty_data = {}

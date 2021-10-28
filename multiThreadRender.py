@@ -149,7 +149,7 @@ class UpdateRenderWidget:
     def update_progress_bar(self, val):
         if val == 100:
             self.status_label.setText("Completed")
-            self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
+            self.status_label.setStyleSheet("color: rgb(85, 255, 0)")
             self.progress_bar.setStyleSheet(
                 open(r"{}\UI\progressBarEnd.qss".format(PACKAGE_PATH), "r+").read()
             )

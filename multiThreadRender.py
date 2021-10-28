@@ -27,12 +27,6 @@ class MultiThreadRender(Ui_Form, QWidget):
         self.render_tableWidget.setColumnWidth(1, 250)
         self.clear_json_cache()
 
-    def hideEvent(self, event):
-        print("this panel is closed  : ", event)
-
-    def showEvent(self, event):
-        print("this panel is opened  :",  event)
-
     @staticmethod
     def clear_json_cache():
         empty_data = {}
@@ -116,6 +110,7 @@ class UpdateRenderWidget:
         self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
         self.stop_button.clicked.connect(lambda: self.delete_kill_task())
         self.open_button.clicked.connect(self.open_folder)
+        self.multi_render_obj.remove_tasks_pushButton.clicked.connect(lambda: self.remove_finish_tasks())
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
 
@@ -123,6 +118,7 @@ class UpdateRenderWidget:
         recent_row_count = self.multi_render_obj.render_tableWidget.rowCount()
         for row in range(recent_row_count):
             del_node_name = self.multi_render_obj.render_tableWidget.item(row, 0).text()
+            print(del_node_name)
             if self.node.name() == del_node_name:
                 with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
                     json_data = json.load(json_file)
@@ -158,6 +154,19 @@ class UpdateRenderWidget:
     def set_render_queue(self):
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
+
+    def remove_finish_tasks(self):
+        row_count = self.multi_render_obj.render_tableWidget.rowCount()
+        for row in range(row_count):
+            status_item = self.multi_render_obj.render_tableWidget.cellWidget(row, 2)
+            status = status_item.text()
+            print(status)
+            if status == "Completed":
+                self.multi_render_obj.render_tableWidget.removeRow(row)
+
+
+
+
 
 
 class WorkerSignals(QObject):

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'RenderPanel.ui',
 # licensing of 'RenderPanel.ui' applies.
 #
-# Created: Tue Oct 26 12:33:18 2021
+# Created: Thu Oct 28 14:37:51 2021
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,9 +27,9 @@ class Ui_Form(object):
         self.queue_checkBox = QtWidgets.QCheckBox(Form)
         self.queue_checkBox.setObjectName("queue_checkBox")
         self.horizontalLayout.addWidget(self.queue_checkBox)
-        self.removed_finished_checkBox = QtWidgets.QCheckBox(Form)
-        self.removed_finished_checkBox.setObjectName("removed_finished_checkBox")
-        self.horizontalLayout.addWidget(self.removed_finished_checkBox)
+        self.remove_tasks_pushButton = QtWidgets.QPushButton(Form)
+        self.remove_tasks_pushButton.setObjectName("remove_tasks_pushButton")
+        self.horizontalLayout.addWidget(self.remove_tasks_pushButton)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -38,6 +38,7 @@ class Ui_Form(object):
 "selection-color: rgb(204, 204, 204);")
         self.render_tableWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.render_tableWidget.setLineWidth(0)
+        self.render_tableWidget.setMidLineWidth(0)
         self.render_tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.render_tableWidget.setDragDropOverwriteMode(False)
         self.render_tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
@@ -77,7 +78,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Form", None, -1))
         self.queue_checkBox.setText(QtWidgets.QApplication.translate("Form", "Queue Renders", None, -1))
-        self.removed_finished_checkBox.setText(QtWidgets.QApplication.translate("Form", "Removed Finished Tasks", None, -1))
+        self.remove_tasks_pushButton.setText(QtWidgets.QApplication.translate("Form", "Remove Finished", None, -1))
         self.render_tableWidget.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Form", "Node", None, -1))
         self.render_tableWidget.horizontalHeaderItem(1).setText(QtWidgets.QApplication.translate("Form", "Progress", None, -1))
         self.render_tableWidget.horizontalHeaderItem(2).setText(QtWidgets.QApplication.translate("Form", "Status", None, -1))

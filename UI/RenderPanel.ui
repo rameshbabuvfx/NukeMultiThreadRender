@@ -38,9 +38,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="removed_finished_checkBox">
+        <widget class="QPushButton" name="remove_tasks_pushButton">
          <property name="text">
-          <string>Removed Finished Tasks</string>
+          <string>Remove Finished</string>
          </property>
         </widget>
        </item>
@@ -113,16 +113,6 @@ selection-color: rgb(204, 204, 204);</string>
        <attribute name="verticalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
-       <row>
-        <property name="text">
-         <string>New Row</string>
-        </property>
-       </row>
-       <row>
-        <property name="text">
-         <string>New Row</string>
-        </property>
-       </row>
        <column>
         <property name="text">
          <string>Node</string>

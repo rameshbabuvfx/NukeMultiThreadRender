@@ -13,8 +13,10 @@ def add_render_knob():
 
     if render_knob == "not exist":
         render_tab = nuke.Tab_Knob("RenderThread", "RenderThread")
-        knob = nuke.PyScript_Knob("SubmitRender")
-        knob.setValue("""
+        range_knob = nuke.Enumeration_Knob("FrameRange", "FrameRange", ["Global Range", "Scan Range", "Write Range", "Set Custom"])
+        thread_knob = nuke.PyScript_Knob("SubmitRender")
+        thread_knob.setFlag(nuke.STARTLINE)
+        thread_knob.setValue("""
 try:
     nuke.scriptSave()
     UpdateRenderWidget(render_panel, nuke.thisNode())
@@ -22,7 +24,8 @@ except Exception as error:
     print(error)
         """)
         node.addKnob(render_tab)
-        node.addKnob(knob)
+        node.addKnob(range_knob)
+        node.addKnob(thread_knob)
 
 
 class TestPanel(nukescripts.PythonPanel):

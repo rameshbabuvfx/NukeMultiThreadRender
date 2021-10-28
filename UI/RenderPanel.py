@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'RenderPanel.ui',
 # licensing of 'RenderPanel.ui' applies.
 #
-# Created: Thu Oct 28 14:37:51 2021
+# Created: Thu Oct 28 15:32:45 2021
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -46,7 +46,7 @@ class Ui_Form(object):
         self.render_tableWidget.setShowGrid(False)
         self.render_tableWidget.setGridStyle(QtCore.Qt.NoPen)
         self.render_tableWidget.setObjectName("render_tableWidget")
-        self.render_tableWidget.setColumnCount(7)
+        self.render_tableWidget.setColumnCount(8)
         self.render_tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.render_tableWidget.setHorizontalHeaderItem(0, item)
@@ -62,6 +62,8 @@ class Ui_Form(object):
         self.render_tableWidget.setHorizontalHeaderItem(5, item)
         item = QtWidgets.QTableWidgetItem()
         self.render_tableWidget.setHorizontalHeaderItem(6, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.render_tableWidget.setHorizontalHeaderItem(7, item)
         self.render_tableWidget.horizontalHeader().setVisible(True)
         self.render_tableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.render_tableWidget.horizontalHeader().setMinimumSectionSize(100)
@@ -81,9 +83,10 @@ class Ui_Form(object):
         self.remove_tasks_pushButton.setText(QtWidgets.QApplication.translate("Form", "Remove Finished", None, -1))
         self.render_tableWidget.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Form", "Node", None, -1))
         self.render_tableWidget.horizontalHeaderItem(1).setText(QtWidgets.QApplication.translate("Form", "Progress", None, -1))
-        self.render_tableWidget.horizontalHeaderItem(2).setText(QtWidgets.QApplication.translate("Form", "Status", None, -1))
-        self.render_tableWidget.horizontalHeaderItem(3).setText(QtWidgets.QApplication.translate("Form", "Controls", None, -1))
-        self.render_tableWidget.horizontalHeaderItem(4).setText(QtWidgets.QApplication.translate("Form", "Time Remaining", None, -1))
-        self.render_tableWidget.horizontalHeaderItem(5).setText(QtWidgets.QApplication.translate("Form", "Frame Range", None, -1))
-        self.render_tableWidget.horizontalHeaderItem(6).setText(QtWidgets.QApplication.translate("Form", "Task", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(2).setText(QtWidgets.QApplication.translate("Form", "Frame", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(3).setText(QtWidgets.QApplication.translate("Form", "Status", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(4).setText(QtWidgets.QApplication.translate("Form", "Controls", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(5).setText(QtWidgets.QApplication.translate("Form", "Time Remaining", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(6).setText(QtWidgets.QApplication.translate("Form", "Frame Range", None, -1))
+        self.render_tableWidget.horizontalHeaderItem(7).setText(QtWidgets.QApplication.translate("Form", "Task", None, -1))
 

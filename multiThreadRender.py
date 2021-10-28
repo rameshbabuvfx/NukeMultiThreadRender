@@ -46,6 +46,8 @@ class UpdateRenderWidget:
         self.open_button = QPushButton()
         self.stop_button = QPushButton()
         self.status_label = QLabel()
+        self.frame_label = QLabel()
+        self.last_frame = str(self.node.frameRange()).split("-")[1]
 
         self.multi_render_obj = render_panel.customKnob.getObject().widget
         self.row_count = self.multi_render_obj.render_tableWidget.rowCount()
@@ -83,13 +85,14 @@ class UpdateRenderWidget:
         self.status_label.setText("Running")
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("color: rgb(242, 156, 54)")
+        self.frame_label.setAlignment(Qt.AlignCenter)
 
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 0, name_item)
         self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 1, self.progress_bar)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
-        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3, self.control_widget)
-        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, range_item)
-        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, file_path_item)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 3, self.status_label)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 4, self.control_widget)
+        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 6, range_item)
+        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 7, file_path_item)
         nuke_exec_path = sys.executable
 
         nuke_render_cmd = r'"{}" -X "{}" "{}" "{}"'.format(
@@ -100,7 +103,7 @@ class UpdateRenderWidget:
         )
         self.worker = RenderThread(
             cmd=nuke_render_cmd,
-            last_frame=str(self.node.frameRange()).split("-")[1],
+            last_frame=self.last_frame,
             node_name=self.node.name()
         )
         self.connect_ui()
@@ -113,12 +116,17 @@ class UpdateRenderWidget:
         self.multi_render_obj.remove_tasks_pushButton.clicked.connect(lambda: self.remove_finish_tasks())
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
+        self.worker.signal.frame_of.connect(self.frame_diff)
+
+    def frame_diff(self, val):
+        frame = "{} of {}".format(val, self.last_frame)
+        self.frame_label.setText(frame)
+        self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.frame_label)
 
     def delete_kill_task(self):
         recent_row_count = self.multi_render_obj.render_tableWidget.rowCount()
         for row in range(recent_row_count):
             del_node_name = self.multi_render_obj.render_tableWidget.item(row, 0).text()
-            print(del_node_name)
             if self.node.name() == del_node_name:
                 with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
                     json_data = json.load(json_file)
@@ -141,9 +149,7 @@ class UpdateRenderWidget:
     def update_progress_bar(self, val):
         if val == 100:
             self.status_label.setText("Completed")
-            self.status_label.setStyleSheet("color: rgb(85, 255, 0)")
             self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.status_label)
-            self.progress_bar.setStyleSheet("color: rgb(85, 255, 0)")
             self.progress_bar.setStyleSheet(
                 open(r"{}\UI\progressBarEnd.qss".format(PACKAGE_PATH), "r+").read()
             )
@@ -151,7 +157,7 @@ class UpdateRenderWidget:
 
     def update_remaining_time(self, val):
         time_item = QTableWidgetItem(val)
-        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 4, time_item)
+        self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, time_item)
 
     def set_render_queue(self):
         if self.multi_render_obj.queue_checkBox.isChecked():
@@ -170,6 +176,7 @@ class UpdateRenderWidget:
 class WorkerSignals(QObject):
     progress_value = Signal(int)
     time_left = Signal(str)
+    frame_of = Signal(str)
 
 
 class RenderThread(QRunnable):
@@ -215,6 +222,7 @@ class RenderThread(QRunnable):
                 remaining_time = sec_to_hours(int(left_seconds))
                 self.signal.progress_value.emit(int(percent))
                 self.signal.time_left.emit(str(remaining_time))
+                self.signal.frame_of.emit(str(value))
             if render_log == "":
                 break
 

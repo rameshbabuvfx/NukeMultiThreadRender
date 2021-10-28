@@ -125,6 +125,11 @@ selection-color: rgb(204, 204, 204);</string>
        </column>
        <column>
         <property name="text">
+         <string>Frame</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Status</string>
         </property>
        </column>

@@ -165,10 +165,6 @@ class UpdateRenderWidget:
                 self.multi_render_obj.render_tableWidget.removeRow(row)
 
 
-
-
-
-
 class WorkerSignals(QObject):
     progress_value = Signal(int)
     time_left = Signal(str)

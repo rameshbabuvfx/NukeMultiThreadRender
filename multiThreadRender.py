@@ -123,8 +123,10 @@ class UpdateRenderWidget:
                 with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
                     json_data = json.load(json_file)
                 process_pid = json_data[str(del_node_name)]
-                os.kill(int(process_pid), 9)
-
+                try:
+                    os.kill(int(process_pid), 9)
+                except:
+                    pass
                 self.multi_render_obj.render_tableWidget.removeRow(row)
 
     def open_folder(self):

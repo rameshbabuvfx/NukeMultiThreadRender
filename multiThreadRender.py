@@ -47,7 +47,7 @@ class UpdateRenderWidget:
         self.stop_button = QPushButton()
         self.status_label = QLabel()
         self.frame_label = QLabel()
-        self.last_frame = self.node["custom_last"].value()
+        self.last_frame = int(self.node["custom_last"].value())
         self.frame_range = self.frame_range_value()
 
         self.multi_render_obj = render_panel.customKnob.getObject().widget
@@ -122,7 +122,7 @@ class UpdateRenderWidget:
     def frame_range_value(self):
         first_frame = self.node['custom_first'].value()
         last_frame = self.node['custom_last'].value()
-        frame_range = "{}-{}".format(first_frame, last_frame)
+        frame_range = "{}-{}".format(int(first_frame), int(last_frame))
         return frame_range
 
     def frame_diff(self, val):
@@ -173,9 +173,8 @@ class UpdateRenderWidget:
     def remove_finish_tasks(self):
         row_count = self.multi_render_obj.render_tableWidget.rowCount()
         for row in range(row_count):
-            status_item = self.multi_render_obj.render_tableWidget.cellWidget(row, 2)
+            status_item = self.multi_render_obj.render_tableWidget.cellWidget(row, 3)
             status = status_item.text()
-            print(status)
             if status == "Completed":
                 self.multi_render_obj.render_tableWidget.removeRow(row)
 

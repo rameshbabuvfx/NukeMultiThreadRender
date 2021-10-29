@@ -169,6 +169,8 @@ class UpdateRenderWidget:
     def set_render_queue(self):
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
+        else:
+            self.multi_render_obj.thread.setMaxThreadCount(8)
 
     def remove_finish_tasks(self):
         row_count = self.multi_render_obj.render_tableWidget.rowCount()

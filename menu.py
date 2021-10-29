@@ -5,6 +5,7 @@ from nukescripts import panels
 
 def add_render_knob():
     node = nuke.thisNode()
+    root_node = nuke.root()
     try:
         node['RenderThread'].value()
         render_knob = "exist"
@@ -13,9 +14,15 @@ def add_render_knob():
 
     if render_knob == "not exist":
         render_tab = nuke.Tab_Knob("RenderThread", "RenderThread")
-        range_knob = nuke.Enumeration_Knob("FrameRange", "FrameRange", ["Global Range", "Scan Range", "Write Range", "Set Custom"])
+        range_first_knob = nuke.Int_Knob("custom_first", "Frame Range")
+        range_last_knob = nuke.Int_Knob("custom_last", "")
+        range_last_knob.clearFlag(nuke.STARTLINE)
+        divider_line = nuke.Text_Knob("divider", "")
         thread_knob = nuke.PyScript_Knob("SubmitRender")
         thread_knob.setFlag(nuke.STARTLINE)
+
+        range_first_knob.setValue(int(root_node['first_frame'].value()))
+        range_last_knob.setValue(int(root_node['last_frame'].value()))
         thread_knob.setValue("""
 try:
     nuke.scriptSave()
@@ -24,7 +31,9 @@ except Exception as error:
     print(error)
         """)
         node.addKnob(render_tab)
-        node.addKnob(range_knob)
+        node.addKnob(range_first_knob)
+        node.addKnob(range_last_knob)
+        node.addKnob(divider_line)
         node.addKnob(thread_knob)
 
 

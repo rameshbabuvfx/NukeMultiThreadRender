@@ -47,7 +47,8 @@ class UpdateRenderWidget:
         self.stop_button = QPushButton()
         self.status_label = QLabel()
         self.frame_label = QLabel()
-        self.last_frame = str(self.node.frameRange()).split("-")[1]
+        self.last_frame = self.node["custom_last"].value()
+        self.frame_range = self.frame_range_value()
 
         self.multi_render_obj = render_panel.customKnob.getObject().widget
         self.row_count = self.multi_render_obj.render_tableWidget.rowCount()
@@ -72,7 +73,7 @@ class UpdateRenderWidget:
         self.progress_bar.setRange(1, 100)
 
         name_item = QTableWidgetItem(self.node.name())
-        range_item = QTableWidgetItem(str(self.node.frameRange()))
+        range_item = QTableWidgetItem(str(self.frame_range))
         file_path_item = QTableWidgetItem(self.render_path)
 
         self.control_layout.setContentsMargins(3, 0, 3, 0)
@@ -99,7 +100,7 @@ class UpdateRenderWidget:
             nuke_exec_path,
             self.node.name(),
             nuke.scriptName(),
-            self.node.frameRange()
+            self.frame_range
         )
         self.worker = RenderThread(
             cmd=nuke_render_cmd,
@@ -117,6 +118,12 @@ class UpdateRenderWidget:
         self.worker.signal.progress_value.connect(self.update_progress_bar)
         self.worker.signal.time_left.connect(self.update_remaining_time)
         self.worker.signal.frame_of.connect(self.frame_diff)
+
+    def frame_range_value(self):
+        first_frame = self.node['custom_first'].value()
+        last_frame = self.node['custom_last'].value()
+        frame_range = "{}-{}".format(first_frame, last_frame)
+        return frame_range
 
     def frame_diff(self, val):
         frame = "{} of {}".format(val, self.last_frame)

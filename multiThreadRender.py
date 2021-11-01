@@ -1,3 +1,8 @@
+"""
+Author      : Ramesh Babu
+Date        : Oct 25 2021
+Script Name : Nuke Multi Thread Render
+"""
 import os
 import platform
 import sys
@@ -21,6 +26,9 @@ PACKAGE_PATH = os.path.dirname(__file__)
 
 class MultiThreadRender(Ui_Form, QWidget):
     def __init__(self):
+        """
+        Main Render panel
+        """
         super(MultiThreadRender, self).__init__()
         self.setupUi(self)
         self.thread = QThreadPool()
@@ -29,6 +37,11 @@ class MultiThreadRender(Ui_Form, QWidget):
 
     @staticmethod
     def clear_json_cache():
+        """
+        Clears subprocess JSON cache when nuke opens.
+
+        :return: None
+        """
         empty_data = {}
         with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "w+") as json_file:
             json.dump(empty_data, json_file, indent=4)
@@ -37,6 +50,12 @@ class MultiThreadRender(Ui_Form, QWidget):
 class UpdateRenderWidget:
 
     def __init__(self, render_panel, node):
+        """
+        Adds the items in main render panel.
+
+        :param Obj render_panel: render panel object
+        :param Dict node: Node data.
+        """
         self.node = node
         self.worker = None
         self.render_path = self.node['file'].value()
@@ -65,6 +84,11 @@ class UpdateRenderWidget:
             nuke.message("Already Task is Running")
 
     def update_render_ui(self):
+        """
+        Creates widgets add date in widgets.
+
+        :return: None
+        """
         self.progress_bar.setStyleSheet(
             open(r"{}\UI\progressBarStart.qss".format(PACKAGE_PATH), "r+").read()
         )
@@ -111,6 +135,11 @@ class UpdateRenderWidget:
         self.multi_render_obj.thread.start(self.worker)
 
     def connect_ui(self):
+        """
+        Connects ui with custom methods.
+
+        :return: None
+        """
         self.multi_render_obj.queue_checkBox.stateChanged.connect(lambda: self.set_render_queue())
         self.stop_button.clicked.connect(lambda: self.delete_kill_task())
         self.open_button.clicked.connect(self.open_folder)
@@ -120,17 +149,33 @@ class UpdateRenderWidget:
         self.worker.signal.frame_of.connect(self.frame_diff)
 
     def frame_range_value(self):
+        """
+        Creates frame range of write node.
+
+        :return Str: Frame range.
+        """
         first_frame = self.node['custom_first'].value()
         last_frame = self.node['custom_last'].value()
         frame_range = "{}-{}".format(int(first_frame), int(last_frame))
         return frame_range
 
     def frame_diff(self, val):
+        """
+        Updates the frame difference in table widget.
+
+        :param Str val: frame number.
+        :return: None.
+        """
         frame = "{} of {}".format(val, self.last_frame)
         self.frame_label.setText(frame)
         self.multi_render_obj.render_tableWidget.setCellWidget(self.row_count, 2, self.frame_label)
 
     def delete_kill_task(self):
+        """
+        Kill/Delete running subprocess and item from the table widget.
+
+        :return: None.
+        """
         recent_row_count = self.multi_render_obj.render_tableWidget.rowCount()
         for row in range(recent_row_count):
             del_node_name = self.multi_render_obj.render_tableWidget.item(row, 0).text()
@@ -145,6 +190,11 @@ class UpdateRenderWidget:
                 self.multi_render_obj.render_tableWidget.removeRow(row)
 
     def open_folder(self):
+        """
+        Opens the current rendering folder.
+
+        :return: None.
+        """
         render_folder = os.path.dirname(self.render_path)
         if os.path.exists(render_folder):
             if (platform.system()).lower() == "linux":
@@ -154,6 +204,12 @@ class UpdateRenderWidget:
                 os.startfile(prj_path)
 
     def update_progress_bar(self, val):
+        """
+        Updates the progress bar value.
+
+        :param Int val: progress bar value.
+        :return: None.
+        """
         if val == 100:
             self.status_label.setText("Completed")
             self.status_label.setStyleSheet("color: rgb(85, 255, 0)")
@@ -163,16 +219,32 @@ class UpdateRenderWidget:
         self.progress_bar.setValue(val)
 
     def update_remaining_time(self, val):
+        """
+        Updates remaining time left in table widget item.
+
+        :param Str val: Remaining time.
+        :return: None.
+        """
         time_item = QTableWidgetItem(val)
         self.multi_render_obj.render_tableWidget.setItem(self.row_count, 5, time_item)
 
     def set_render_queue(self):
+        """
+        Sets the render queue or parallel render.
+
+        :return: None.
+        """
         if self.multi_render_obj.queue_checkBox.isChecked():
             self.multi_render_obj.thread.setMaxThreadCount(1)
         else:
             self.multi_render_obj.thread.setMaxThreadCount(8)
 
     def remove_finish_tasks(self):
+        """
+        Removes the completed tasks from table widget.
+
+        :return: None.
+        """
         row_count = self.multi_render_obj.render_tableWidget.rowCount()
         for row in range(row_count):
             status_item = self.multi_render_obj.render_tableWidget.cellWidget(row, 3)
@@ -182,6 +254,9 @@ class UpdateRenderWidget:
 
 
 class WorkerSignals(QObject):
+    """
+    Declaring signal objects.
+    """
     progress_value = Signal(int)
     time_left = Signal(str)
     frame_of = Signal(str)
@@ -189,6 +264,13 @@ class WorkerSignals(QObject):
 
 class RenderThread(QRunnable):
     def __init__(self, cmd=None, last_frame=None, node_name=None):
+        """
+        InIt method for worker class.
+
+        :param Str cmd: Nuke terminal render command.
+        :param Int last_frame: Last frame of write node.
+        :param Str node_name: Node name of write.
+        """
         super(RenderThread, self).__init__()
         self.cmd = cmd
         self.total = last_frame
@@ -197,6 +279,11 @@ class RenderThread(QRunnable):
         self.start_time = time.time()
 
     def run(self):
+        """
+        Run method
+
+        :return: None.
+        """
         render_process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE)
         with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "r+") as json_file:
             json_data = json.load(json_file)

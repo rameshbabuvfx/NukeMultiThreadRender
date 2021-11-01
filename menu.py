@@ -4,6 +4,11 @@ from nukescripts import panels
 
 
 def add_render_knob():
+    """
+    Adds user knob in write node.
+
+    :return: None.
+    """
     node = nuke.thisNode()
     root_node = nuke.root()
     try:

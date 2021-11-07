@@ -12,6 +12,7 @@ import json
 
 try:
     import nuke
+    import nukescripts
 except:
     pass
 
@@ -196,12 +197,7 @@ class UpdateRenderWidget:
         :return: None.
         """
         render_folder = os.path.dirname(self.render_path)
-        if os.path.exists(render_folder):
-            if (platform.system()).lower() == "linux":
-                os.system("xdg-open '%s'" % render_folder)
-            else:
-                prj_path = render_folder.replace("/", "\\")
-                os.startfile(prj_path)
+        nukescripts.start(render_folder)
 
     def update_progress_bar(self, val):
         """

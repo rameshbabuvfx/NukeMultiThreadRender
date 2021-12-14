@@ -4,21 +4,17 @@ Date        : Oct 25 2021
 Script Name : Nuke Multi Thread Render
 """
 import os
-import platform
 import sys
 import time
 import subprocess
 import json
 
-try:
-    import nuke
-    import nukescripts
-except:
-    pass
-
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+
+import nuke
+import nukescripts
 
 from UI.RenderPanel import Ui_Form
 
@@ -41,7 +37,7 @@ class MultiThreadRender(Ui_Form, QWidget):
         """
         Clears subprocess JSON cache when nuke opens.
 
-        :return: None
+        :return: None.
         """
         empty_data = {}
         with open(r"{}\subprocessCache\ProcessID.json".format(PACKAGE_PATH), "w+") as json_file:
@@ -54,7 +50,7 @@ class UpdateRenderWidget:
         """
         Adds the items in main render panel.
 
-        :param Obj render_panel: render panel object
+        :param Obj render_panel: render panel object.
         :param Dict node: Node data.
         """
         self.node = node

@@ -1,4 +1,4 @@
-[![GitHub issues](https://img.shields.io/github/issues/rameshbabuvfx/NukeMultiThreadRender?style=plastic)](https://github.com/rameshbabuvfx/NukeMultiThreadRender/issues)
+[![GitHub issues](https://img.shields.io/github/issues/rameshbabuvfx/NukeMultiThreadRender?style=plastic)](https://github.com/rameshbabuvfx/NukeMultiThreadRender/issues) [![GitHub license](https://img.shields.io/github/license/rameshbabuvfx/NukeMultiThreadRender)](https://github.com/rameshbabuvfx/NukeMultiThreadRender)
 # NukeMultiThreadRender
 
 NukeMultiThreadRender tool allows the artist to render multiple tasks at once.

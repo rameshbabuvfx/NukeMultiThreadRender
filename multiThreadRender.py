@@ -199,8 +199,8 @@ class UpdateRenderWidget:
         """
         Updates the progress bar value.
 
-        :param Int val: progress bar value.
-        :return: None.
+        param Int val: progress bar value
+        return: None.
         """
         if val == 100:
             self.status_label.setText("Completed")
